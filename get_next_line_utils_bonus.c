@@ -12,16 +12,6 @@
 
 #include "get_next_line_bonus.h"
 
-size_t	ft_strlen(const char *s)
-{
-	size_t	size;
-
-	size = 0;
-	while (s[size])
-		size++;
-	return (size);
-}
-
 void	*ft_realloc(char *ptr, size_t new)
 {
 	char	*res;
@@ -45,7 +35,7 @@ void	*ft_realloc(char *ptr, size_t new)
 	return (res);
 }
 
-int	ft_strchr(const char *s, int c)
+char	*ft_strchr(const char *s, int c)
 {
 	int	i;
 
@@ -53,12 +43,14 @@ int	ft_strchr(const char *s, int c)
 	while (s[i])
 	{
 		if (s[i] == (char)c)
-			return (1);
+		{
+			return ((char *)s + i);
+		}
 		i++;
 	}
 	if (s[i] == (char)c)
-		return (1);
-	return (0);
+		return ((char *)s + i);
+	return (NULL);
 }
 
 char	*ft_strdup(const char *s)
@@ -95,4 +87,14 @@ size_t	ft_strlcpy(char *dst, const char *src, size_t size)
 	}
 	dst[i] = '\0';
 	return (ssrc);
+}
+
+size_t	ft_strlen(const char *s)
+{
+	size_t	size;
+
+	size = 0;
+	while (s[size])
+		size++;
+	return (size);
 }

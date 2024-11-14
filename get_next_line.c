@@ -11,40 +11,40 @@
 /* ************************************************************************** */
 #include "get_next_line.h"
 
-char	*create_line(int byte_read, char **old, char **buffer)
+char	*create_line(int byte_read, char **stashed, char **buffer)
 {
 	char	*temp;
 	char	*res;
 
-	if (byte_read <= 0 && !(*old) && (*buffer)[0] == '\0')
+	if (byte_read <= 0 && !(*stashed) && (*buffer)[0] == '\0')
 	{
 		free(*buffer);
 		return (NULL);
 	}
-	temp = recover_old(*buffer, *old);
+	temp = recover_stashed(*buffer, *stashed);
 	free(*buffer);
 	if (!temp)
 		return (NULL);
-	res = seperate(temp, &(*old));
+	res = seperate(temp, &(*stashed));
 	free(temp);
 	if (!res[0])
 	{
 		free(res);
 		return (NULL);
 	}
-	if (!(*old) && byte_read == -1)
-		free(*old);
+	if (!(*stashed) && byte_read == -1)
+		free(*stashed);
 	return (res);
 }
 
-void	*on_error(char **buffer, char **old)
+void	*on_error(char **buffer, char **stashed)
 {
 	free(*buffer);
 	*buffer = NULL;
-	if (*old)
+	if (*stashed)
 	{
-		free(*old);
-		*old = NULL;
+		free(*stashed);
+		*stashed = NULL;
 	}
 	return (NULL);
 }
@@ -53,7 +53,7 @@ char	*get_next_line(int fd)
 {
 	int			byte_read;
 	char		*buffer;
-	static char	*old;
+	static char	*stashed;
 	int			pos;
 
 	buffer = malloc(sizeof(char) * (BUFFER_SIZE + 1));
@@ -64,7 +64,7 @@ char	*get_next_line(int fd)
 	{
 		byte_read = read(fd, buffer + pos, BUFFER_SIZE);
 		if (byte_read == -1)
-			return (on_error(&buffer, &old));
+			return (on_error(&buffer, &stashed));
 		buffer[byte_read + pos] = '\0';
 		if (byte_read == 0 || ft_strchr(buffer, '\n'))
 			break ;
@@ -73,24 +73,24 @@ char	*get_next_line(int fd)
 		if (!buffer)
 			return (NULL);
 	}
-	return (create_line(byte_read, &old, &buffer));
+	return (create_line(byte_read, &stashed, &buffer));
 }
 
-char	*recover_old(char *buffer, char *old)
+char	*recover_stashed(char *buffer, char *stashed)
 {
 	char	*res;
 
-	if (!old)
+	if (!stashed)
 		return (ft_strdup(buffer));
-	res = malloc(ft_strlen(buffer) + ft_strlen(old) + 1);
+	res = malloc(ft_strlen(buffer) + ft_strlen(stashed) + 1);
 	if (!res)
 		return (NULL);
-	ft_strlcpy(res, old, ft_strlen(old) + 1);
-	ft_strlcpy(res + ft_strlen(old), buffer, ft_strlen(buffer) + 1);
+	ft_strlcpy(res, stashed, ft_strlen(stashed) + 1);
+	ft_strlcpy(res + ft_strlen(stashed), buffer, ft_strlen(buffer) + 1);
 	return (res);
 }
 
-char	*seperate(char *buffer, char **old)
+char	*seperate(char *buffer, char **stashed)
 {
 	int		i;
 	char	*res;
@@ -104,12 +104,12 @@ char	*seperate(char *buffer, char **old)
 	if (!res)
 		return (NULL);
 	res[i] = '\0';
-	if (*old)
+	if (*stashed)
 	{
-		free(*old);
-		*old = NULL;
+		free(*stashed);
+		*stashed = NULL;
 	}
 	if (buffer[i])
-		*old = ft_strdup(buffer + i);
+		*stashed = ft_strdup(buffer + i);
 	return (res);
 }
